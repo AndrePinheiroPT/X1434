@@ -1,0 +1,4 @@
+(lang dune 3.22)
+(name X1434)
+(sections (lib .))
+(files (lib (META dune-package opam)))

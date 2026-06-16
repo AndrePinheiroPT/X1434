@@ -1,0 +1,4 @@
+(library
+ (name html_renderer)
+ (modules html index)
+ (libraries md tyxml))
