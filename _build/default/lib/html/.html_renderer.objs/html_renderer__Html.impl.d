@@ -1,1 +1,1 @@
-lib/html/html.ml: Index List Md Tyxml
+lib/html/html.ml: List Md Tyxml

@@ -21,4 +21,4 @@ let render_block = function
 
 let render_fields fs = () 
 
-let render_doc (Doc(fs, bs)) = bs |> List.map (render_block) |> Index.index
+let render_doc (Doc(fs, bs)) = bs |> List.map (render_block) 

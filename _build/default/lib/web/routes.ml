@@ -1,3 +1,6 @@
 
 let routes =
-  [ Dream.get "/" (fun _ -> Pages.home) ]
+  [
+    Dream.get "/" Pages.home;
+    Dream.get "/static/**" (Dream.static "static")
+  ]
