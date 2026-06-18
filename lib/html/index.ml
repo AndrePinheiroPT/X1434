@@ -1,8 +1,18 @@
 open Tyxml.Html
 
-let main content = 
+module StringMap = Map.Make(String)
+  
+let main field_map content = 
+  let tit = match StringMap.find_opt "title" field_map  with
+    | Some v -> v
+    | None -> "[NONE]"
+  in
+  let date = match StringMap.find_opt "date" field_map  with
+    | Some v -> [i [txt v]];
+    | None -> []
+  in
   html
-    (head (title (txt "Test")) [ link ~rel:[`Stylesheet] ~href:"/static/style.css" ();])
+    (head (title (txt tit)) [ link ~rel:[`Stylesheet] ~href:"/static/style.css" ();])
     (body [
       div ~a:[a_id "app"] [
         header [
@@ -30,7 +40,7 @@ let main content =
           ]
         ];
 
-        section ~a:[a_id "main"] content;
+        section ~a:[a_id "main"] (date @ [hr ()] @ content);
       ];
-      script (Unsafe.data "let hasScrolled=false;window.addEventListener('scroll',()=>{const nav = document.querySelector('.header__nav');if(window.scrollY>50){nav.classList.add('is-scrolled');nav.classList.remove('is-initial');hasScrolled = true;}else if(hasScrolled){nav.classList.remove('is-scrolled');nav.classList.add('is-initial');}});")
+      script (Unsafe.data "let hasScrolled=false;window.addEventListener('scroll',()=>{const nav=document.querySelector('.header__nav');if(window.scrollY>50){nav.classList.add('is-scrolled');nav.classList.remove('is-initial');hasScrolled = true;}else if(hasScrolled){nav.classList.remove('is-scrolled');nav.classList.add('is-initial');}});")
     ])

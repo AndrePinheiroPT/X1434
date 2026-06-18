@@ -1,4 +1,4 @@
 (library
  (name web)
- (modules pages routes)
- (libraries html_renderer dream))
+ (modules routes)
+ (libraries html_renderer dream md))
