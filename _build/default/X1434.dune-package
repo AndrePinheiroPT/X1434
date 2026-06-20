@@ -1,4 +1,4 @@
 (lang dune 3.22)
 (name X1434)
-(sections (lib .))
-(files (lib (META dune-package opam)))
+(sections (lib .) (doc ../../doc/X1434))
+(files (lib (META dune-package opam)) (doc (LICENSE README.md)))

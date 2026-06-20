@@ -3,7 +3,7 @@ open Parser
 }
 
 let whitespace = [' ' '\t']
-let text = [^ '#' '$' '*' '`' '[' ']' '(' ')' '\n']+
+let text = [^ '!' '#' '$' '*' '_' '`' '[' ']' '(' ')' '\n']+
 
 rule token = parse
   | "%--" [' ' '\t' '\n']* { FBEGIN }
@@ -11,10 +11,22 @@ rule token = parse
   | "%%%"            { END }
   | (['a'-'z' 'A'-'Z' '_']+ as key) ':' [' ' '\t']* '"' ([^ '"']* as value) '"' [' ' '\t' '\n']+
     { FIELD(key,value) }   
+  | "![" ([^ ']' ]+ as alt) "](" ([^ ')']* as url) ')' 
+    { IMG(alt,url) }
+  | "!{" (([^ ',' '}' ]+ (',' [^ ',' '}' ]+)*) as arr) "}("      
+    { LREDA(arr) }
+  | '[' ([^ ']' ]+ as alt) "](" ([^ ')']* as url) ')' 
+    { LINK(alt,url) } 
+  | '`' ([^ '`']+ as code)  '`'  { CODELINE(code) }
+  | "```" ([^ '`']+ as code) "```"  { CODEBLOCK(code) }
+  | '$' ([^ '$']+ as code)  '$'  { LATEXLINE(code) }
+  | "$$" ([^ '$']+ as code) "$$"  { LATEXBLOCK(code) }
   | "---"          { HLINE }
   | "### "          { H3 }
   | "## "           { H2 }
   | "# "            { H1 }
+  | "__"           { DULINE }
+  | "_"            { ULINE }
   | "**"           { DSTAR }
   | "*"            { STAR }
   | "`"            { BACKTICK }
@@ -22,8 +34,9 @@ rule token = parse
   | "]"            { RBRACKET }
   | "("            { LPAREN }
   | ")"            { RPAREN }
+  | '!'            { EXCLA }
   | '\n''\n'+      { DNL }
-  | '\n'           { NL }
+  | '\n' whitespace*  { NL }
   | whitespace+    { token lexbuf } 
   | text as s      { TXT(s) }
   | eof            { EOF }

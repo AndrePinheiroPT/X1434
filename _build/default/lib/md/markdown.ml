@@ -27,6 +27,16 @@ let pp_token = function
   | FEND -> "FEND"
   | FBEGIN -> "FBEGIN"
   | FIELD(k,v) -> "FIELD("^k^","^v^")"
+  | IMG(k,v) -> "IMG("^k^","^v^")"
+  | LREDA(arr) -> "LREDA("^arr^")"
+  | DULINE -> "DULINE"
+  | ULINE -> "ULINE"
+  | EXCLA -> "EXCLA"
+  | CODEBLOCK(c) -> "CODEBLOCK("^c^")"
+  | CODELINE(c) -> "CODELINE("^c^")"
+  | LINK(k,v) -> "LINK("^k^","^v^")"
+  | LATEXLINE(c) -> "LATEXLINE("^c^")"
+  | LATEXBLOCK(c) -> "LATEXBLOCK("^c^")"
 
 let debug_token lexbuf =
   let tok = Lexer.token lexbuf in

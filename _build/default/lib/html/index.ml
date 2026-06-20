@@ -12,7 +12,15 @@ let main field_map content =
     | None -> []
   in
   html
-    (head (title (txt tit)) [ link ~rel:[`Stylesheet] ~href:"/static/style.css" ();])
+    (head (title (txt tit)) 
+    [ 
+      link ~rel:[`Stylesheet] ~href:"/static/style.css" ();
+      script ~a:[
+        a_id "MathJax-script";
+        a_async ();
+        a_src "https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js";
+      ] (txt "")
+    ])
     (body [
       div ~a:[a_id "app"] [
         header [
