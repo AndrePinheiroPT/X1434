@@ -3,12 +3,12 @@ type token =
   | FEND
   | HLINE
   | FIELD of (
-# 7 "parser.mly"
+# 8 "parser.mly"
         string * string
 # 9 "parser.mli"
 )
   | IMG of (
-# 8 "parser.mly"
+# 9 "parser.mly"
         string * string
 # 14 "parser.mli"
 )
@@ -16,7 +16,7 @@ type token =
   | H2
   | H3
   | TXT of (
-# 10 "parser.mly"
+# 11 "parser.mly"
         string
 # 22 "parser.mli"
 )
@@ -31,34 +31,34 @@ type token =
   | LPAREN
   | RPAREN
   | LREDA of (
-# 16 "parser.mly"
+# 17 "parser.mly"
         string
 # 37 "parser.mli"
 )
   | NL
   | DNL
   | LINK of (
-# 18 "parser.mly"
+# 19 "parser.mly"
         string * string
 # 44 "parser.mli"
 )
   | CODELINE of (
-# 19 "parser.mly"
+# 20 "parser.mly"
         string
 # 49 "parser.mli"
 )
   | CODEBLOCK of (
-# 19 "parser.mly"
+# 20 "parser.mly"
         string
 # 54 "parser.mli"
 )
   | LATEXLINE of (
-# 20 "parser.mly"
+# 21 "parser.mly"
         string
 # 59 "parser.mli"
 )
   | LATEXBLOCK of (
-# 20 "parser.mly"
+# 21 "parser.mly"
         string
 # 64 "parser.mli"
 )
@@ -66,4 +66,4 @@ type token =
   | END
 
 val main :
-  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Ast.doc
+  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> string Utils.StringMap.t * Ast.node list

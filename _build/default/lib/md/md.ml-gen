@@ -11,3 +11,6 @@ module Markdown = Md__Markdown
 
 (** @canonical Md.Parser *)
 module Parser = Md__Parser
+
+(** @canonical Md.Utils *)
+module Utils = Md__Utils

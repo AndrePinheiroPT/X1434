@@ -1,32 +1,68 @@
 open Tyxml.Html
 open Md.Ast
 
-let rec render_inline = function
-  | Break -> br ()
-  | Text(s) -> txt s
-  | Italic(xs) -> i ( render_inlines xs )
-  | Bold (xs) -> b ( render_inlines xs )
-  | Img(alt,url) -> img ~src: url ~alt: alt ()
-  | Link(alt,url) -> a ~a:[a_href url] [txt alt]
-  | CodeLine(c) -> code [txt c] 
-  | CodeBlock(c) -> code [txt c]
-  | LatexLine(c) -> span [ txt ("\\("^c^"\\)") ]
-  | LatexBlock(c) -> span [ txt ("\\["^c^"\\]") ]
-  | Redact(arr,ctx) -> txt "REDACTED"
+module StringMap = Map.Make(String)
+module StringSet = Set.Make(String)
 
-and render_inlines xs = xs |> List.map render_inline 
+let gene_html f_node =
+  let lift x = Unsafe.coerce_elt x in
+  
+  match f_node with
+  | Text s -> lift (txt s)
+  | Break -> lift (br ())
+  | HorLine -> lift (hr ())
+  
+  | Paragraph ns -> Unsafe.node "p" ns
+  | Bold ns -> Unsafe.node "b" ns
+  | Italic ns -> Unsafe.node "i" ns
+  
+  | Head (lvl, ns) ->
+      let tag = match lvl with
+        | 1 -> "h1" | 2 -> "h2" | 3 -> "h3"
+        | 4 -> "h4" | 5 -> "h5" | _ -> "h6"
+      in
+      Unsafe.node tag ns
 
-let render_block _ = function
-  | Head(i,s) -> 
-    begin match i with
-      | 1 -> h1 (render_inlines s)
-      | 2 -> h2 (render_inlines s)
-      | 3 -> h3 (render_inlines s)
-      | _ -> h3 (render_inlines s)
-    end
-  | HorLine -> hr ()
-  | Paragraph(xs) -> p (render_inlines xs )
+  | CodeLine s -> lift (code [txt s])
+  | CodeBlock s -> lift (pre [code [txt s]])
+  | LatexLine s -> lift (span ~a:[a_class ["math-inline"]] [txt s])
+  | LatexBlock s -> lift (div ~a:[a_class ["math-block"]] [txt s])
+  | Img (alt, src) -> lift (img ~src ~alt ())
+  | Link (lbl, u) -> lift (a ~a:[a_href u] [txt lbl])
 
+  | Redact _ -> lift (span [txt "???"])
+
+let gene_reduce key f_node =
+  match f_node with
+  | Break  -> [In Break]
+  | HorLine -> [In HorLine]
+
+  | Text s -> [In (Text s)]
+  | CodeLine s -> [In (CodeLine s)]
+  | LatexLine s -> [In (LatexLine s)]
+  | LatexBlock s -> [In (LatexBlock s)]
+  | CodeBlock s -> [In (CodeBlock s)]
+  | Img (a,s) -> [In (Img (a,s))]
+  | Link (a,s) -> [In (Link (a,s))]
+
+  | Italic nss -> [In (Italic (List.concat nss))]
+  | Bold nss -> [In (Bold (List.concat nss))]
+  | Paragraph nss -> [In (Paragraph (List.concat nss))]
+
+  | Head (i,s) -> [In (Head (i,List.concat s))]
+  | Redact (ls,s) -> (if List.mem key ls then [In (Text "[REDACTED]")] else List.concat s)
+
+let gene_collect_ids f_node =
+  match f_node with
+  | Break | HorLine | Text _ | CodeLine _ | CodeBlock _ 
+  | LatexLine _ | LatexBlock _ | Img _ | Link _ -> StringSet.empty
+
+  | Italic nss | Bold nss | Paragraph nss | Head (_, nss) -> List.fold_left StringSet.union StringSet.empty nss
+
+  | Redact (ls,nss) -> 
+    let ids = StringSet.of_list ls in
+    let child_ids = List.fold_left StringSet.union StringSet.empty nss in
+    StringSet.union ids child_ids
 
 let rec md_files dir = 
   Sys.readdir dir
@@ -37,13 +73,3 @@ let rec md_files dir =
     else if Filename.check_suffix path ".md" then [path]
     else []
   )
-
-module StringMap = Map.Make(String)
-
-let process_fields fs = List.fold_left (fun acc (Field(k,v)) -> StringMap.add k v acc) StringMap.empty fs 
-
-
-let render_doc (Doc(fs, bs)) = 
-  (process_fields fs) 
-  |> fun x -> (x, bs |> List.map (render_block x))
-  |> fun (x, h) -> (x, Index.main x h)

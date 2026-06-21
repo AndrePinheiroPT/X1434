@@ -1,47 +1,50 @@
+module StringMap = Map.Make(String)
+
 type field = Field of string * string  
 
-type inline = 
+type 'a node_f = 
   | Break
+  | HorLine 
+
   | Text of string 
-  | Italic of inline list
-  | Bold of inline list
-  | Redact of string * inline list
-  | Img of string * string
-  | Link of string * string
   | CodeLine of string
-  | CodeBlock of string
   | LatexLine of string
   | LatexBlock of string
+  | CodeBlock of string
+  | Img of string * string
+  | Link of string * string
 
-type block =
-  | Head of (int * (inline list))
-  | HorLine 
-  | Paragraph of inline list
+  | Italic of 'a list
+  | Bold of 'a list
+  | Paragraph of 'a list
   
+  | Head of (int * ('a list))
+  | Redact of (string list * 'a list)
 
-type doc = Doc of field list * block list
+type node = In of node node_f
+let out (In n) = n
 
-let rec render_inline = function
-  | Break -> "\n"
-  | Text(s) -> s
-  | Italic(xs) -> "Italic("^ render_inlines xs ^")"
-  | Bold(xs) -> "Bold("^ render_inlines xs ^")"
-  | Redact(xy, xs) -> "Redact("^ xy ^","^render_inlines xs ^")"
-  | Img(alt,url) -> "Img("^ alt ^","^url^")"
-  | Link(alt,url) -> "Link("^ alt ^","^url^")"
-  | CodeLine(code) -> "CodeLine"^code
-  | CodeBlock(code) -> "CodeBlock"^code
-  | LatexLine(code) -> "LatexLine"^code
-  | LatexBlock(code) -> "LatexBlock"^code
+let fmap g = function 
+  | Break -> Break
+  | HorLine -> HorLine
 
-and render_inlines xs = xs |> List.map render_inline |> String.concat ", " 
+  | Text s -> Text s
+  | CodeLine s -> CodeLine s
+  | LatexLine s -> LatexLine s
+  | LatexBlock s -> LatexBlock s
+  | CodeBlock s -> CodeBlock s
+  | Img (a,s) -> Img (a,s)
+  | Link (a,s) -> Link (a,s)
 
-let render_block = function
-  | Head(i,s) -> "Head("^ string_of_int i ^ ", {"^ render_inlines s ^"})"
-  | HorLine -> "HorizontalLine"
-  | Paragraph(xs) -> render_inlines xs 
+  | Italic l -> Italic (List.map g l)
+  | Bold l -> Bold (List.map g l)
+  | Paragraph l -> Paragraph (List.map g l)
 
-let render_doc (Doc(fs, bs)) = 
-  let render_fields = fs |> List.map (fun (Field(k,v)) -> "{"^k^", "^v^"}") |> String.concat ", " in
-  let render_blocks = bs |> List.map (render_block) |> String.concat ", " in
-  "[" ^ render_fields ^ "] (" ^ render_blocks ^ ")"
+  | Head (i,l) -> Head (i, List.map g l)
+  | Redact (ls,l) -> Redact (ls, List.map g l)
+
+let rec cata gene n = n |> out |> fmap (cata gene) |> gene
+
+
+
+

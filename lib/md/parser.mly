@@ -1,5 +1,6 @@
 %{
 open Ast
+open Utils
 %}
 
 %token FBEGIN FEND
@@ -22,15 +23,14 @@ open Ast
 
 
 %start main
-%type <Ast.doc> main 
-%type <Ast.inline list> inline_list
-%type <Ast.block list> body
+%type <string Utils.StringMap.t * Ast.node list> main
+%type <Ast.node list> inline_list
 
 %% 
 
 main: 
     | head body EOF
-        { Ast.Doc($1,$2) }
+        { ($1,$2) }
 
 head:
     | FBEGIN fields FEND
@@ -38,35 +38,45 @@ head:
 
 fields:
     | FIELD fields
-        { let (k,v) = $1 in Ast.Field(k,v) :: $2 }
+        { 
+            let (k,v) = $1 in 
+            StringMap.add k v $2
+        }
     | 
-        { [] }
+        { StringMap.empty }
 
 body: 
     | HLINE body
-        { Ast.HorLine :: $2 }
+        { (In HorLine) :: $2 }
     | header body
         { $1 :: $2 }
     | paragraph body
         { $1 :: $2 }
+    | IMG body
+        { let (alt, src) = $1 in (In (Img(alt, src))) :: $2 }
+    | CODEBLOCK body
+        { (In (CodeBlock($1))) :: $2 }
     | END
         { [] }
 
 paragraph:
     | inline_list DNL 
-        { Ast.Paragraph($1) }
+        { In (Paragraph($1)) }
 
 header: 
     | H1 inline_list DNL
-        { Ast.Head(1, $2) }
+        { In (Head(1, $2)) }
     | H2 inline_list  DNL
-        { Ast.Head(2, $2) }
+        { In (Head(2, $2)) }
     | H3 inline_list DNL
-        { Ast.Head(3, $2) }
+        { In (Head(3, $2)) }
 
 inline_list:
     | LREDA inline_list RPAREN inline_list 
-        { [Ast.Redact($1,$2)] @ $4 }
+        { 
+            let id_list = $1 |> String.split_on_char ',' |> List.map String.trim in
+            [In (Redact (id_list,$2))] @ $4 
+        }
     | inline_element inline_list
         { $1 @ $2 }
     | 
@@ -75,34 +85,30 @@ inline_list:
 inline_element:
     | atomic_text_list
         { $1 }
-    | IMG
-        { [$1 |> (fun (x,y) -> Ast.Img(x,y))] }
     | LINK
-        { [$1 |> (fun (x,y) -> Ast.Link(x,y))] }
+        { let (lbl, url) = $1 in [In (Link(lbl, url))] }
     | CODELINE 
-        { [Ast.CodeLine($1)] }
-    | CODEBLOCK
-        { [Ast.CodeBlock($1)] }
+        { [In (CodeLine($1))] }
     | LATEXLINE 
-        { [Ast.LatexLine($1)] }
+        { [In (LatexLine($1))] }
     | LATEXBLOCK
-        { [Ast.LatexBlock($1)] }
+        { [In (LatexBlock($1))] }
     | DSTAR italic_inline DSTAR 
-        { [Ast.Bold($2)] }
+        { [In (Bold($2))] }
     | DULINE italic_inline DULINE
-        { [Ast.Bold($2)] }
+        { [In (Bold($2))] }
     | STAR bold_inline STAR   
-        { [Ast.Italic($2)] }
+        { [In (Italic($2))] }
     | ULINE bold_inline ULINE   
-        { [Ast.Italic($2)] }
+        { [In (Italic($2))] }
 
 italic_inline: 
     | atomic_text italic_inline
         { $1 :: $2 }
     | STAR atomic_text_list STAR italic_inline
-        { Ast.Italic($2) :: $4 }
+        { (In (Italic($2))) :: $4 }
     | ULINE atomic_text_list ULINE italic_inline
-        { Ast.Italic($2) :: $4 }
+        { (In (Italic($2))) :: $4 }
     | 
         { [] }
 
@@ -110,19 +116,19 @@ bold_inline:
     | atomic_text bold_inline
         { $1 :: $2 }
     | DSTAR atomic_text_list DSTAR bold_inline
-        { Ast.Bold($2) :: $4 }
+        { (In (Bold($2))) :: $4 }
     | DULINE atomic_text_list DULINE bold_inline
-        { Ast.Bold($2) :: $4 }
+        { (In (Bold($2))) :: $4 }
     |
         { [] }
 
 atomic_text:
     | EXCLA               
-        { Ast.Text("!") }
+        { In (Text("!")) }
     | TXT               
-        { Ast.Text($1) }
+        { In (Text($1)) }
     | NL                
-        { Ast.Break }
+        { In Break }
 
 atomic_text_list:
     | atomic_text atomic_text_list
