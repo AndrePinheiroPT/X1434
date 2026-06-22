@@ -1,9 +1,0 @@
-lib: [
-  "_build/install/default/lib/X1434/META"
-  "_build/install/default/lib/X1434/dune-package"
-  "_build/install/default/lib/X1434/opam"
-]
-doc: [
-  "_build/install/default/doc/X1434/LICENSE"
-  "_build/install/default/doc/X1434/README.md"
-]
