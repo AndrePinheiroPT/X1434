@@ -3,14 +3,17 @@ open Parser
 }
 
 let whitespace = [' ' '\t']
-let text = [^ '!' '#' '$' '*' '_' '`' '[' ']' '(' ')' '\n']+
+let text = [^ '!' '#' '$' '*' '_' '`' '[' ']' '(' ')' '{' '}' '\n']+
 
 rule token = parse
   | "%--" [' ' '\t' '\n']* { FBEGIN }
+  | "-%-" [' ' '\t' '\n']* { FMID }
   | "--%" [' ' '\t' '\n']* { FEND }
   | "%%%"            { END }
   | (['a'-'z' 'A'-'Z' '_']+ as key) ':' [' ' '\t']* '"' ([^ '"']* as value) '"' [' ' '\t' '\n']+
     { FIELD(key,value) }   
+  | '{' ([^'}']* as arr) '}' '[' ([^']']+ as alt) "]("  ([^ ')']* as url) ')' [' ' '\t' '\n']+
+    { NAV(arr,alt,url) }   
   | "![" ([^ ']' ]+ as alt) "](" ([^ ')']* as url) ')' 
     { IMG(alt,url) }
   | "!{" (([^ ',' '}' ]+ (',' [^ ',' '}' ]+)*) as arr) "}("      

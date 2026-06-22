@@ -1,12 +1,10 @@
 open Tyxml.Html
 open Md.Ast
+open Md.Utils
 
-module StringMap = Map.Make(String)
-module StringSet = Set.Make(String)
+let lift x = Unsafe.coerce_elt x
 
 let gene_html f_node =
-  let lift x = Unsafe.coerce_elt x in
-  
   match f_node with
   | Text s -> lift (txt s)
   | Break -> lift (br ())
@@ -64,6 +62,48 @@ let gene_collect_ids f_node =
     let child_ids = List.fold_left StringSet.union StringSet.empty nss in
     StringSet.union ids child_ids
 
+let gene_collect_static_url f_node =
+  let prefix = "/static/asset/" in
+  let normalize url = 
+    if String.starts_with ~prefix url then
+      let s = String.length prefix in
+      Some (String.sub url s (String.length url - s))
+    else None
+  in
+
+  match f_node with
+  | Break | HorLine | Text _ | CodeLine _ | CodeBlock _ | LatexLine _ | LatexBlock _ -> []
+
+  | Img (_, url) | Link (_, url) -> 
+    (match normalize url with
+    | Some path -> [([],path)]
+    | None -> [] 
+    )
+
+  | Redact (allowed_ids, nss) -> (nss |> List.concat |> List.map (fun (l, url) -> (allowed_ids @ l ,url)) )
+  | Italic nss | Bold nss | Paragraph nss | Head (_, nss) -> List.concat nss
+
+let gene_append_id pid f_node =
+  match f_node with
+  | Break  -> [In Break]
+  | HorLine -> [In HorLine]
+
+  | Text s -> [In (Text s)]
+  | CodeLine s -> [In (CodeLine s)]
+  | LatexLine s -> [In (LatexLine s)]
+  | LatexBlock s -> [In (LatexBlock s)]
+  | CodeBlock s -> [In (CodeBlock s)]
+  | Img (a,s) -> [In (Img (a,s^pid))]
+  | Link (a,s) -> [In (Link (a,s^pid))]
+
+  | Italic nss -> [In (Italic (List.concat nss))]
+  | Bold nss -> [In (Bold (List.concat nss))]
+  | Paragraph nss -> [In (Paragraph (List.concat nss))]
+
+  | Head (i,s) -> [In (Head (i,List.concat s))]
+  | Redact (ls,s) -> [In (Redact(ls, List.concat s))]
+
+
 let rec md_files dir = 
   Sys.readdir dir
   |> Array.to_list
@@ -73,3 +113,7 @@ let rec md_files dir =
     else if Filename.check_suffix path ".md" then [path]
     else []
   )
+
+let nav_tyxml nav = List.map (fun (_,alt,url) -> 
+  lift (a ~a:[a_href url; a_class ["header__nav__sublink"]] [txt alt])) nav
+  

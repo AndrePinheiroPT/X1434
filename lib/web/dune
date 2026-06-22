@@ -1,4 +1,4 @@
 (library
  (name web)
  (modules routes)
- (libraries html_renderer dream md))
+ (libraries html_renderer dream md cryptokit))

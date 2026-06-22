@@ -3,7 +3,7 @@ open Ast
 open Utils
 %}
 
-%token FBEGIN FEND
+%token FBEGIN FMID FEND
 %token HLINE
 %token <string * string> FIELD 
 %token <string * string> IMG
@@ -15,6 +15,7 @@ open Utils
 %token LBRACKET RBRACKET 
 %token LPAREN RPAREN 
 %token <string> LREDA
+%token <string * string * string> NAV
 %token NL DNL
 %token <string * string> LINK
 %token <string> CODELINE CODEBLOCK
@@ -23,18 +24,29 @@ open Utils
 
 
 %start main
-%type <string Utils.StringMap.t * Ast.node list> main
+%type <string Utils.StringMap.t * (string list * string * string ) list * Ast.node list> main
 %type <Ast.node list> inline_list
 
 %% 
 
 main: 
-    | head body EOF
-        { ($1,$2) }
+    | head nav body EOF
+        { ($1,$2,$3) }
 
 head:
-    | FBEGIN fields FEND
+    | FBEGIN fields FMID
         { $2 }
+
+nav:
+    | NAV nav
+        { 
+            let (b,alt,url) = $1 in
+            let id_list = b |> String.split_on_char ',' |> List.map String.trim in
+            (id_list,alt,url) :: $2
+        }
+    | FEND
+        { [] }
+
 
 fields:
     | FIELD fields
@@ -52,8 +64,6 @@ body:
         { $1 :: $2 }
     | paragraph body
         { $1 :: $2 }
-    | IMG body
-        { let (alt, src) = $1 in (In (Img(alt, src))) :: $2 }
     | CODEBLOCK body
         { (In (CodeBlock($1))) :: $2 }
     | END
@@ -79,6 +89,8 @@ inline_list:
         }
     | inline_element inline_list
         { $1 @ $2 }
+    | IMG inline_list
+        { let (alt, src) = $1 in (In (Img(alt, src))) :: $2 }
     | 
         { [] }
 
