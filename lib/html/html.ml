@@ -13,7 +13,7 @@ let gene_html f_node =
   | Paragraph ns -> Unsafe.node "p" ns
   | Bold ns -> Unsafe.node "b" ns
   | Italic ns -> Unsafe.node "i" ns
-  
+  | BulletList ns -> lift (ul (List.map li ns))
   | Head (lvl, ns) ->
       let tag = match lvl with
         | 1 -> "h1" | 2 -> "h2" | 3 -> "h3"
@@ -25,7 +25,7 @@ let gene_html f_node =
   | CodeBlock s -> lift (pre [code [txt s]])
   | LatexLine s -> lift (span ~a:[a_class ["math-inline"]] [txt s])
   | LatexBlock s -> lift (div ~a:[a_class ["math-block"]] [txt s])
-  | Img (alt, src) -> lift (img ~src ~alt ())
+  | Img (alt, src) -> lift (div [img ~src ~alt ~a:[a_class ["img_main"]] (); span ~a:[a_class ["img_label"]] [txt alt]])
   | Link (lbl, u) -> lift (a ~a:[a_href u] [txt lbl])
 
   | Redact _ -> lift (span [txt "???"])
@@ -46,6 +46,7 @@ let gene_reduce key f_node =
   | Italic nss -> [In (Italic (List.concat nss))]
   | Bold nss -> [In (Bold (List.concat nss))]
   | Paragraph nss -> [In (Paragraph (List.concat nss))]
+  | BulletList nss -> [In (BulletList (List.map List.concat nss))]
 
   | Head (i,s) -> [In (Head (i,List.concat s))]
   | Redact (ls,s) -> (if List.mem key ls then [In (Text "[REDACTED]")] else List.concat s)
@@ -56,6 +57,7 @@ let gene_collect_ids f_node =
   | LatexLine _ | LatexBlock _ | Img _ | Link _ -> StringSet.empty
 
   | Italic nss | Bold nss | Paragraph nss | Head (_, nss) -> List.fold_left StringSet.union StringSet.empty nss
+  | BulletList nss -> nss |> List.concat |> (List.fold_left StringSet.union StringSet.empty) 
 
   | Redact (ls,nss) -> 
     let ids = StringSet.of_list ls in
@@ -82,6 +84,7 @@ let gene_collect_static_url f_node =
 
   | Redact (allowed_ids, nss) -> (nss |> List.concat |> List.map (fun (l, url) -> (allowed_ids @ l ,url)) )
   | Italic nss | Bold nss | Paragraph nss | Head (_, nss) -> List.concat nss
+  | BulletList nss -> nss |> List.map List.concat |> List.concat
 
 let gene_append_id pid f_node =
   match f_node with
@@ -99,6 +102,7 @@ let gene_append_id pid f_node =
   | Italic nss -> [In (Italic (List.concat nss))]
   | Bold nss -> [In (Bold (List.concat nss))]
   | Paragraph nss -> [In (Paragraph (List.concat nss))]
+  | BulletList nss -> [In (BulletList (List.map List.concat nss))]
 
   | Head (i,s) -> [In (Head (i,List.concat s))]
   | Redact (ls,s) -> [In (Redact(ls, List.concat s))]

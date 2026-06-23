@@ -20,6 +20,7 @@ open Utils
 %token <string * string> LINK
 %token <string> CODELINE CODEBLOCK
 %token <string> LATEXLINE LATEXBLOCK
+%token BULLET
 %token EOF END
 
 
@@ -64,10 +65,23 @@ body:
         { $1 :: $2 }
     | paragraph body
         { $1 :: $2 }
+    | list_block body
+        { $1 :: $2 }
     | CODEBLOCK body
         { (In (CodeBlock($1))) :: $2 }
     | END
         { [] }
+
+list_block:
+    | list_items
+        { In (BulletList($1)) }
+
+list_items:
+    | BULLET inline_list DNL
+        { [$2] }
+
+    | BULLET inline_list NL list_items
+        { $2 :: $4 }
 
 paragraph:
     | inline_list DNL 
@@ -139,8 +153,6 @@ atomic_text:
         { In (Text("!")) }
     | TXT               
         { In (Text($1)) }
-    | NL                
-        { In Break }
 
 atomic_text_list:
     | atomic_text atomic_text_list

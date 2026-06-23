@@ -1,9 +1,11 @@
 {
 open Parser
+
+let beg = ref true
 }
 
 let whitespace = [' ' '\t']
-let text = [^ '!' '#' '$' '*' '_' '`' '[' ']' '(' ')' '{' '}' '\n']+
+let text = [^ '!' '#' '$' '*' '_' '-' '`' '[' ']' '{' '}' '(' ')' '\\' '\n']+
 
 rule token = parse
   | "%--" [' ' '\t' '\n']* { FBEGIN }
@@ -28,6 +30,17 @@ rule token = parse
   | "### "          { H3 }
   | "## "           { H2 }
   | "# "            { H1 }
+  | "\\-" { TXT("-") }
+  | "\\_" { TXT("_") }
+  | "\\*" { TXT("*") }
+  | "\\`" { TXT("`") }
+  | "\\[" { TXT("[") }
+  | "\\]" { TXT("]") }
+  | "\\(" { TXT("(") }
+  | "\\)" { TXT(")") }
+  | "\\!" { TXT("!") }
+  | "\\#" { TXT("#") }
+  | "- " { BULLET }
   | "__"           { DULINE }
   | "_"            { ULINE }
   | "**"           { DSTAR }
@@ -38,7 +51,7 @@ rule token = parse
   | "("            { LPAREN }
   | ")"            { RPAREN }
   | '!'            { EXCLA }
-  | '\n''\n'+      { DNL }
+  | '\n''\n'+      { beg:=true; DNL }
   | '\n' whitespace*  { NL }
   | whitespace+    { token lexbuf } 
   | text as s      { TXT(s) }

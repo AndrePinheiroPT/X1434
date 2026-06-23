@@ -68,6 +68,7 @@ type token =
         string
 # 70 "parser.mli"
 )
+  | BULLET
   | EOF
   | END
 

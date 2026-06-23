@@ -6,7 +6,11 @@ route: "/personal"
 {}[IDK BRO](/nonpersonal)
 --%
 
-Welcome to my website! You might know me as **GRU** on discord or **whoCook** in VRChat. 
+Welcome to\_my website! You might know me as **GRU** on discord or **whoCook** in VRChat. 
+
+- geo
+- combi
+- **aura** 
 
 # About me
 

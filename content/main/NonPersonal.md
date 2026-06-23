@@ -38,6 +38,7 @@ Vamos mostrar um pouco de código, tipo `upper_bound(all(a))` é bem bacano e ta
 let x = 1 in
     Printf.printf %d x
 ```
+
 Lol, lets see if $\LaTeX$ works! We have the formula $1+1=2$ and $$\begin{matrix}
 R^n & \overset{A}{\longrightarrow} & R^m \\
 \cong &  & \cong \\

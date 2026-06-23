@@ -59,6 +59,16 @@ body {
     min-height: 100vh;
 }
 
+
+#main {
+    position: relative;
+    left: calc(var(--nav-width) / 2);
+    text-align: left;
+    max-width: 750px;
+    margin: 0 auto;
+    padding-top: var(--top-offset);
+}
+
 #main h1 {
     font-family: "CMU Sans Serif", serif;
     font-size: 3rem;       
@@ -104,10 +114,6 @@ body {
     
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-}
-
-#main img{
-    max-width: 800px;
 }
 
 #main a{
@@ -171,23 +177,13 @@ body {
 
 }
 
-#main {
-    position: relative;
-    left: calc(var(--nav-width) / 2);
-
-    max-width: 750px;
-    margin: 0 auto;
-    padding-top: var(--top-offset);
-
-    text-align: center;
-}
-
 .img_main {
     display: block;
     max-width: 100%;
     height: auto;
     margin: 0 auto;
     border-radius: 8px;
+    max-width: 750px;
 }
 
 .img_label {

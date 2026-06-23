@@ -39,6 +39,7 @@ let pp_token = function
   | LINK(k,v) -> "LINK("^k^","^v^")"
   | LATEXLINE(c) -> "LATEXLINE("^c^")"
   | LATEXBLOCK(c) -> "LATEXBLOCK("^c^")"
+  | BULLET -> "BULLET"
 
 let debug_token lexbuf =
   let tok = Lexer.token lexbuf in
