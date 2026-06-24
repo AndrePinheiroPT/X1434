@@ -2,6 +2,7 @@
 title: "NonPersonal"
 date: "67-67-2067"   
 route: "/nonpersonal"
+entry: "/nonpersonal"
 -%-
 {7,67,3}[Handouts](/handouts)
 {1}[Book](/books)

@@ -54,6 +54,7 @@ let build_route (m,nav,bs)  =
   let handler = fun req -> 
     let id = Dream.query req "id" in
     let asg = Dream.query req "asg" in
+    let entry = match StringMap.find_opt "entry" m with | Some r -> r | None -> "/" in
    
     let binding_pipe = 
       product id asg
@@ -66,7 +67,7 @@ let build_route (m,nav,bs)  =
         let final_tree = List.concat_map (cata (gene_append_id pid)) reduced_nodes in
         let filtered_nav = nav |> List.filter (fun (l,_,_) -> not (List.mem valid_id l) ) |> List.map (fun (a,b,u) -> (a,b,u^pid)) |> nav_tyxml in
         let content = List.map (cata gene_html) final_tree in
-          return (Index.main m filtered_nav content)
+          return (Index.main m filtered_nav (entry^pid) content)
         )
     in
     match binding_pipe with 

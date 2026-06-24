@@ -2,7 +2,7 @@ open Tyxml.Html
 
 module StringMap = Map.Make(String)
   
-let main field_map nav_content content = 
+let main field_map nav_content entry content = 
   let tit = match StringMap.find_opt "title" field_map  with
     | Some v -> v
     | None -> "[NONE]"
@@ -25,7 +25,7 @@ let main field_map nav_content content =
       div ~a:[a_id "app"] [
         header [
           nav ~a:[a_class ["header__nav"]] [ 
-            a ~a:[a_href "/"; a_class ["header__nav__logo"]] [img ~src:"/static/img/logo.svg" ~alt:"Logo" ()];
+            a ~a:[a_href entry; a_class ["header__nav__logo"]] [img ~src:"/static/img/logo.svg" ~alt:"Logo" ()];
 
             img ~src:"/static/img/test.svg" ~alt:"" ~a:[a_class ["nav-icon-two"; "swapping" ]] ();
             img ~src:"/static/img/line-center.svg" ~alt:"" ~a:[a_class ["nav-line-connector";"swapping"]] ();

@@ -11,8 +11,8 @@ bug-reports: "https://github.com/AndrePinheiroPT/X1434/issues"
 depends: [
   "dune" {>= "3.22"}
   "ocaml"
-  "cryptokit"
   "dream"
+  "cryptokit"
   "odoc" {with-doc}
 ]
 build: [
