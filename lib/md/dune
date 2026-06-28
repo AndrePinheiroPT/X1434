@@ -1,3 +1,4 @@
 (library
  (name md)
- (modules ast markdown lexer parser utils))
+ (modules ast markdown lexer parser utils nav)
+ (libraries yojson))

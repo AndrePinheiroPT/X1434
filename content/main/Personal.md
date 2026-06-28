@@ -1,14 +1,13 @@
 %--
 title: "Personal"
 date: "67-67-2067"   
-route: "/personal"
 -%-
 {}[IDK BRO](/nonpersonal)
 --%
 
 Welcome to\_my website! You might know me as **GRU** on discord or **whoCook** in VRChat. 
 
-- geo
+- Lorem ipsum dolor sit amet, consectetur adipiscing elit. In congue augue non lobortis maximus. Pellentesque vel lacinia orci. Cras vitae lacinia orci. Etiam id lobortis sapien. Mauris at risus dolor. Donec nulla augue, ultrices et dictum et, volutpat sit amet nisi. Nulla a mauris eget arcu condimentum placerat nec non risus. Maecenas eu tincidunt odio, non porttitor orci. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In faucibus nisl ornare, elementum nunc eget, consequat nulla.
 - combi
 - **aura** 
 

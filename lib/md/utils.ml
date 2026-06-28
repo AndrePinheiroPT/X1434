@@ -17,3 +17,11 @@ module Option : Monad with type 'a t = 'a option = struct
     | Some ctx -> f ctx
     | None -> None
 end
+
+let t2 f g x = (f x, g x ) 
+
+let id x = x
+
+let rem_suf suf s =
+  if String.ends_with ~suffix:suf s then String.sub s 0 (String.length s - String.length suf)
+  else s

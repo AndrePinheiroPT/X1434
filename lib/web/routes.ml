@@ -1,6 +1,7 @@
 open Html_renderer.Html
 open Html_renderer
 open Md.Utils
+open Md.Nav
 open Md.Utils.Option
 open Md
 open Ast
@@ -25,49 +26,39 @@ let product ma mb =
 
 let block blocked_list (id,asg) = if List.mem id blocked_list then None else Some (id,asg)
 
-let valid ids_set (id,asg) = if StringSet.mem id ids_set then Some (id,asg) else None
-
 let block_list m = match StringMap.find_opt "block" m with | Some v -> String.split_on_char ',' v | None -> []
 
-let docs =
-  md_files "content"
-  |> List.map md_to_doc
+let valid_ids = List.map fst (StringMap.bindings get_entry)
 
-let valid_ids =
-  docs 
-  |> List.map (fun (m,n,b) -> 
-    let ids_from_nodes = b |> List.map (cata gene_collect_ids) |> List.fold_left StringSet.union StringSet.empty  in
-    let ids_from_field = m |> block_list |> StringSet.of_list in 
-    StringSet.union ids_from_nodes ids_from_field
-  )
-  |> List.fold_left StringSet.union StringSet.empty 
+let check_id_exists idx = if List.mem idx valid_ids then Some idx else None
 
 let block_assets_map =
-  docs
+  md_files "content" 
+  |> List.map md_to_doc
   |> List.concat_map (fun (m,n,b) -> b |> List.concat_map (cata gene_collect_static_url) |> List.map (fun (l, url) -> ((block_list m) @ l ,url)))
   |> List.fold_left (fun m (l,p) -> 
     List.fold_left (fun mm id -> StringMap.update p (function | Some k -> Some (StringSet.add id k) | None -> Some (StringSet.singleton id)) mm) m l
   ) StringMap.empty
 
-let build_route (m,nav,bs)  = 
-  let route = match StringMap.find_opt "route" m with | Some v -> v | None -> "/" in
+let build_route (route,(m,nav,bs)) = 
   let handler = fun req -> 
-    let id = Dream.query req "id" in
+    
+    let idx = Dream.query req "id" in
     let asg = Dream.query req "asg" in
-    let entry = match StringMap.find_opt "entry" m with | Some r -> r | None -> "/" in
    
     let binding_pipe = 
-      product id asg
+      product (idx >>= check_id_exists) asg
       >>= verify
-      >>= (valid valid_ids)
       >>= (block (block_list m))
       >>= (fun (valid_id,valid_asg) ->
+        let entry = match StringMap.find_opt valid_id get_entry with | Some x -> x | None -> "/" in
         let pid = "?id="^valid_id^"&asg="^valid_asg in
+        Dream.log "entry: %s" (entry^pid);
         let reduced_nodes = List.concat_map (cata (gene_reduce valid_id)) bs in  
         let final_tree = List.concat_map (cata (gene_append_id pid)) reduced_nodes in
         let filtered_nav = nav |> List.filter (fun (l,_,_) -> not (List.mem valid_id l) ) |> List.map (fun (a,b,u) -> (a,b,u^pid)) |> nav_tyxml in
         let content = List.map (cata gene_html) final_tree in
-          return (Index.main m filtered_nav (entry^pid) content)
+          return (Index.main m filtered_nav ("/"^entry^pid) content)
         )
     in
     match binding_pipe with 
@@ -77,19 +68,10 @@ let build_route (m,nav,bs)  =
   Dream.get route handler
 
 
-let get_valid_ids (m,nav,bs) = 
-  let nav_ids_set = nav |> List.map (fun (l,_,_) -> StringSet.of_list l) |> List.fold_left StringSet.union StringSet.empty in 
-  let redacted_ids_set = List.map (cata gene_collect_ids) bs |> List.fold_left StringSet.union StringSet.empty in
-  (StringSet.of_list (block_list m)) 
-  |> StringSet.union nav_ids_set
-  |> StringSet.union redacted_ids_set
-
 let print_ids = 
-  let out = StringSet.fold (fun s acc -> 
-    Dream.log "Link -> ?id=%s&asg=%s" s (sign s); 
-    s^", "^acc
-    ) valid_ids "" in
-  Dream.log "All ids collected: %s" out
+  Dream.log "Map of all sources blocked by ids";
+  StringMap.fold (fun s route _ -> Dream.log "Link %s -> https://localhost:8080/%s?id=%s&asg=%s" s route s (sign s)) get_entry ()
+  
 
 let log_stringset_map m =
   StringMap.iter (fun key set -> 
@@ -134,7 +116,6 @@ let give_asset req =
   let pipe =
     product id asg
     >>= verify
-    >>= (valid valid_ids)
     >>= check_permissions
   in
 
@@ -145,8 +126,8 @@ let give_asset req =
 
 let routes = 
   log_stringset_map block_assets_map;
-  docs
-  |> List.map (fun (m, nav, bs) -> build_route (m, nav, bs))
+  md_files "content" 
+  |> List.map (fun x -> build_route @@ t2 (rem_suf ".md") md_to_doc x)
   |> fun rs -> rs @ [
     Dream.get "/static/asset/**" give_asset;
     Dream.get "/static/**" (Dream.static "static/main");

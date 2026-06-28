@@ -1,6 +1,5 @@
 %--
 title: "Blocked"
-route: "/block"
 -%-
 --%
 
