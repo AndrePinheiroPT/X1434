@@ -18,7 +18,7 @@ I have 67 medals in IMO and a lot of awards in ICPC.
 
 I like to rizz people
 
-This is just a test lol. I am going to tell you the solution to that __G8__, first you need to !{1,34}(going _**to** smth_ that *I dont **understand** like this*) and we are done.
+This is just a test lol. I am going to tell you the solution to that __G8__, first you need to !{1,34}(going _**to** smth_ that *I dont **understand** like this*) and we are done. Did you know **that $1+1=2$**?
 
 Time to show some ICPC, just look 
 

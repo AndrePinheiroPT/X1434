@@ -14,12 +14,30 @@ let main field_map nav_content entry content =
   html
     (head (title (txt tit)) 
     [ 
+      link ~rel:[`Icon] ~href:"/static/favicon.ico" ();
       link ~rel:[`Stylesheet] ~href:"/static/style.css" ();
-      script ~a:[
-        a_id "MathJax-script";
-        a_async ();
-        a_src "https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js";
-      ] (txt "")
+      link ~rel:[`Stylesheet] ~href:"https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css"
+          ~a:[
+            a_integrity "sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB";
+            a_crossorigin `Anonymous;
+          ] ();
+
+      script
+        ~a:[
+          a_defer ();
+          a_src "https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js";
+          a_integrity "sha384-AtrdNsnxl/75rvBneBVH7DtOvCxSVahR2zWqle1coBKd8DEmLoviqNeJSx64gNAs";
+          a_crossorigin `Anonymous;
+        ] (txt "");
+
+      script
+        ~a:[
+          a_defer ();
+          a_src "https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/contrib/auto-render.min.js";
+          a_integrity "sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz";
+          a_crossorigin `Anonymous;
+          Unsafe.string_attrib "onload" "renderMathInElement(document.body);";
+        ] (txt "");
     ])
     (body [
       div ~a:[a_id "app"] [

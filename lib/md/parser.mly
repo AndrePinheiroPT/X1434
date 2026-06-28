@@ -113,10 +113,6 @@ inline_element:
         { $1 }
     | LINK
         { let (lbl, url) = $1 in [In (Link(lbl, url))] }
-    | CODELINE 
-        { [In (CodeLine($1))] }
-    | LATEXLINE 
-        { [In (LatexLine($1))] }
     | LATEXBLOCK
         { [In (LatexBlock($1))] }
     | DSTAR italic_inline DSTAR 
@@ -151,6 +147,10 @@ bold_inline:
 atomic_text:
     | EXCLA               
         { In (Text("!")) }
+    | LATEXLINE 
+        { In (LatexLine($1)) }
+    | CODELINE 
+        { In (CodeLine($1)) }
     | TXT               
         { In (Text($1)) }
 

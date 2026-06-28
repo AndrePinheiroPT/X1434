@@ -23,8 +23,8 @@ let gene_html f_node =
 
   | CodeLine s -> lift (code [txt s])
   | CodeBlock s -> lift (pre [code [txt s]])
-  | LatexLine s -> lift (span ~a:[a_class ["math-inline"]] [txt s])
-  | LatexBlock s -> lift (div ~a:[a_class ["math-block"]] [txt s])
+  | LatexLine s -> lift (txt ("\\("^s^"\\)"))
+  | LatexBlock s -> lift (txt ("$$"^s^"$$"))
   | Img (alt, src) -> lift (div [img ~src ~alt ~a:[a_class ["img_main"]] (); span ~a:[a_class ["img_label"]] [txt alt]])
   | Link (lbl, u) -> lift (a ~a:[a_href u] [txt lbl])
 
