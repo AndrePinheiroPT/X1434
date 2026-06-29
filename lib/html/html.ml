@@ -14,6 +14,7 @@ let gene_html f_node =
   | Bold ns -> Unsafe.node "b" ns
   | Italic ns -> Unsafe.node "i" ns
   | BulletList ns -> lift (ul (List.map li ns))
+  | QuoteBlock ns -> lift (blockquote (List.map (Unsafe.node "p") ns))
   | Head (lvl, ns) ->
       let tag = match lvl with
         | 1 -> "h1" | 2 -> "h2" | 3 -> "h3"
@@ -47,6 +48,7 @@ let gene_reduce key f_node =
   | Bold nss -> [In (Bold (List.concat nss))]
   | Paragraph nss -> [In (Paragraph (List.concat nss))]
   | BulletList nss -> [In (BulletList (List.map List.concat nss))]
+  | QuoteBlock nss -> [In (QuoteBlock (List.map List.concat nss))]
 
   | Head (i,s) -> [In (Head (i,List.concat s))]
   | Redact (ls,s) -> (if List.mem key ls then [In (Text "[REDACTED]")] else List.concat s)
@@ -57,7 +59,7 @@ let gene_collect_ids f_node =
   | LatexLine _ | LatexBlock _ | Img _ | Link _ -> StringSet.empty
 
   | Italic nss | Bold nss | Paragraph nss | Head (_, nss) -> List.fold_left StringSet.union StringSet.empty nss
-  | BulletList nss -> nss |> List.concat |> (List.fold_left StringSet.union StringSet.empty) 
+  | QuoteBlock nss | BulletList nss -> nss |> List.concat |> (List.fold_left StringSet.union StringSet.empty) 
 
   | Redact (ls,nss) -> 
     let ids = StringSet.of_list ls in
@@ -84,7 +86,7 @@ let gene_collect_static_url f_node =
 
   | Redact (allowed_ids, nss) -> (nss |> List.concat |> List.map (fun (l, url) -> (allowed_ids @ l ,url)) )
   | Italic nss | Bold nss | Paragraph nss | Head (_, nss) -> List.concat nss
-  | BulletList nss -> nss |> List.map List.concat |> List.concat
+  | QuoteBlock nss | BulletList nss -> nss |> List.map List.concat |> List.concat
 
 let gene_append_id pid f_node =
   match f_node with
@@ -103,6 +105,7 @@ let gene_append_id pid f_node =
   | Bold nss -> [In (Bold (List.concat nss))]
   | Paragraph nss -> [In (Paragraph (List.concat nss))]
   | BulletList nss -> [In (BulletList (List.map List.concat nss))]
+  | QuoteBlock nss -> [In (QuoteBlock (List.map List.concat nss))]
 
   | Head (i,s) -> [In (Head (i,List.concat s))]
   | Redact (ls,s) -> [In (Redact(ls, List.concat s))]

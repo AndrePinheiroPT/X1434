@@ -40,6 +40,7 @@ let pp_token = function
   | LATEXLINE(c) -> "LATEXLINE("^c^")"
   | LATEXBLOCK(c) -> "LATEXBLOCK("^c^")"
   | BULLET -> "BULLET"
+  | GE -> "GE"
 
 let debug_token lexbuf =
   let tok = Lexer.token lexbuf in

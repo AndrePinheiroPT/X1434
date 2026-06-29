@@ -218,6 +218,25 @@ body {
     display: block;
 }
 
+#main blockquote {
+    position: relative;
+    margin: 2.5rem 0;
+    padding: 1.2rem 1.5rem 1.2rem 2rem;
+
+    font-family: "CMU Sans Serif ", serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    line-height: 1.7;
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 4px solid var(--c2);
+}
+
+#main blockquote p {
+    margin: 0 0 0.2rem 0;
+}
+
 .header__nav {
     width: var(--nav-width);
     min-width: var(--nav-width); 

@@ -5,8 +5,27 @@ open Md.Nav
 open Md.Utils.Option
 open Md
 open Ast
+open Yaml
 
 let md_to_doc file_path = (In_channel.open_bin file_path) |> Markdown.parse 
+
+let get_yaml = 
+  let ic = open_in "config.yml" in  
+  let len = in_channel_length ic in 
+  let yml_string = really_input_string ic len in 
+  close_in ic;
+  match Yaml.of_string yml_string with
+  | Ok yaml -> yaml
+  | Error (`Msg msg) -> failwith msg
+
+let get_key = 
+  match get_yaml with
+  | `O fields -> 
+    begin match List.assoc_opt "SECRET_KEY" fields with 
+    | Some (`String key) -> key
+    | _ -> failwith "No key found"
+  end
+  | _ -> failwith "No key found"
 
 let hmac key msg =
   let hash = Cryptokit.MAC.hmac_sha256 key in
@@ -14,7 +33,7 @@ let hmac key msg =
   Cryptokit.transform_string (Cryptokit.Hexa.encode ()) raw
 
 let sign msg =
-  let key = Sys.getenv "SECRET_KEY" in
+  let key = get_key in
   hmac key msg
 
 let verify (id,asg) = if sign id = asg then Some (id,asg) else None 

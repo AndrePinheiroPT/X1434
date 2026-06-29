@@ -20,7 +20,7 @@ open Utils
 %token <string * string> LINK
 %token <string> CODELINE CODEBLOCK
 %token <string> LATEXLINE LATEXBLOCK
-%token BULLET
+%token BULLET GE
 %token EOF END
 
 
@@ -67,10 +67,22 @@ body:
         { $1 :: $2 }
     | list_block body
         { $1 :: $2 }
+    | quote_block body
+        { $1 :: $2 }
     | CODEBLOCK body
         { (In (CodeBlock($1))) :: $2 }
     | END
         { [] }
+
+quote_block:
+    | quote_items
+        { In (QuoteBlock($1)) }
+
+quote_items:
+    | GE inline_list DNL 
+        { [$2] }
+    | GE inline_list NL quote_items
+        { $2 :: $4 }
 
 list_block:
     | list_items

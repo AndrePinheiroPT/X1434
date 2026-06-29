@@ -18,6 +18,7 @@ type 'a node_f =
   | Bold of 'a list
   | Paragraph of 'a list
   | BulletList of 'a list list
+  | QuoteBlock of 'a list list
 
   | Head of (int * ('a list))
   | Redact of (string list * 'a list)
@@ -41,6 +42,7 @@ let fmap g = function
   | Bold l -> Bold (List.map g l)
   | Paragraph l -> Paragraph (List.map g l)
   | BulletList l -> BulletList (List.map (List.map g) l)
+  | QuoteBlock l -> QuoteBlock (List.map (List.map g) l)
 
   | Head (i,l) -> Head (i, List.map g l)
   | Redact (ls,l) -> Redact (ls, List.map g l)
